@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import imageLoader from "../image-loader";
 import { useState, useEffect } from "react";
 import ImageManager from "../components/ImageManager";
 import Slider from "../components/Slider";
+import { imageLoader } from "../utils/imageLoader";
 import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
 
 export default function NSWPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imagesPerRow, setImagesPerRow] = useState(3);
-  const [selectedImages, setSelectedImages] = useState<number[]>([]); // Added state for selected images
+  const [selectedImages, setSelectedImages] = useState<number[]>([]);
 
   useEffect(() => {
     loadImageUrls().then(setImageUrls);
@@ -31,7 +31,6 @@ export default function NSWPage() {
   return (
     <div className="nsw">
       <h1>New South Wales</h1>
-      <p>Welcome to the NSW page.</p>
       <Slider
         value={imagesPerRow}
         onChange={(value) => setImagesPerRow(value)}
@@ -63,7 +62,7 @@ export default function NSWPage() {
         {imageUrls.map((url, index) => (
           <Image // Fixed: changed to use the Image component
             key={index}
-            loader={imageLoader}
+            loader={(props) => imageLoader({ ...props, quality: 75 })}
             src={url}
             width={300}
             height={225}
