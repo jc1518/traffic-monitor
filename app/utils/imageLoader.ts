@@ -1,9 +1,9 @@
-export const imageLoader = (
+export default function imageLoader(
   src: string,
   width: number,
   quality?: number
-): string => {
+): string {
   return `/api/image?url=${encodeURIComponent(src)}&w=${width}&q=${
     quality || 75
   }`;
-};
+}

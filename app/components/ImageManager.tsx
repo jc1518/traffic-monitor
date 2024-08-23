@@ -1,19 +1,33 @@
-import React, { useState } from "react";
+import React from "react";
+import Image from "next/image";
+import { imageLoader } from "../utils/imageLoader";
+import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
+import { useState, useEffect } from "react";
 
 interface ImageManagerProps {
-  imageUrls: string[];
-  addImageUrl: (url: string) => void;
-  selectedImages: number[];
-  setSelectedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  imagesPerRow: number;
 }
 
-const ImageManager: React.FC<ImageManagerProps> = ({
-  imageUrls,
-  addImageUrl,
-  selectedImages,
-  setSelectedImages,
-}) => {
-  const [newImageUrl, setNewImageUrl] = useState("");
+const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
+  const [newImageUrl, setNewImageUrl] = useState<string>("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<number[]>([]);
+
+  useEffect(() => {
+    loadImageUrls().then(setImageUrls);
+  }, []);
+
+  const addImageUrl = (url: string) => {
+    const newUrls = [...imageUrls, url];
+    setImageUrls(newUrls);
+    saveImageUrls(newUrls);
+  };
+
+  const removeImages = (index: number) => {
+    const newUrls = imageUrls.filter((_, i) => i !== index);
+    setImageUrls(newUrls);
+    saveImageUrls(newUrls);
+  };
 
   const handleAddImage = () => {
     if (isValidUrl(newImageUrl)) {
@@ -33,6 +47,8 @@ const ImageManager: React.FC<ImageManagerProps> = ({
     }
   };
 
+  console.log(selectedImages);
+
   return (
     <div>
       <input
@@ -41,7 +57,49 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         onChange={(e) => setNewImageUrl(e.target.value)}
         placeholder="Enter image URL"
       />
-      <button onClick={handleAddImage}>Add Image</button>
+      <div>
+        <button onClick={handleAddImage}>Add Image</button>
+      </div>
+      <div>
+        <button
+          onClick={() => {
+            const newUrls = imageUrls.filter(
+              (_, index) => !selectedImages.includes(index)
+            );
+            setImageUrls(newUrls);
+            saveImageUrls(newUrls);
+            setSelectedImages([]);
+          }}
+        >
+          Remove Selected Images
+        </button>
+      </div>
+      <div
+        className="image-grid"
+        style={{ gridTemplateColumns: `repeat(${imagesPerRow}, 1fr)` }}
+      >
+        {imageUrls.map((url, index) => (
+          <Image
+            key={index}
+            src={url}
+            width={300}
+            height={225}
+            quality={80}
+            alt={`NSW Traffic Image ${index + 1}`}
+            unoptimized
+            onClick={() => {
+              setSelectedImages((prev) =>
+                prev.includes(index)
+                  ? prev.filter((i) => i !== index)
+                  : [...prev, index]
+              );
+            }}
+            style={{
+              border: selectedImages.includes(index) ? "2px solid red" : "none",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
