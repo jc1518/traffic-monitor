@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import { imageLoader } from "../utils/imageLoader";
 import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
 import { useState, useEffect } from "react";
 
@@ -47,8 +46,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
     }
   };
 
-  console.log(selectedImages);
-
   return (
     <div>
       <input
@@ -76,7 +73,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
       </div>
       <div
         className="image-grid"
-        style={{ gridTemplateColumns: `repeat(${imagesPerRow}, 1fr)` }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${imagesPerRow}, 1fr)`,
+        }}
       >
         {imageUrls.map((url, index) => (
           <Image
@@ -84,7 +84,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
             src={url}
             width={300}
             height={225}
-            quality={80}
+            quality={70}
             alt={`NSW Traffic Image ${index + 1}`}
             unoptimized
             onClick={() => {
@@ -95,7 +95,12 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
               );
             }}
             style={{
-              border: selectedImages.includes(index) ? "2px solid red" : "none",
+              border: selectedImages.includes(index)
+                ? "2px solid red"
+                : "3px solid white",
+              objectFit: "cover",
+              width: "100%",
+              height: "auto",
             }}
           />
         ))}
