@@ -10,14 +10,9 @@ const client = new BedrockRuntimeClient({
   credentials: fromIni(),
 });
 
-export async function converseWithModel(userMessage: string) {
+export async function converseWithModel(userMessage: Message) {
   const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
-  const conversation: Message[] = [
-    {
-      role: "user" as const,
-      content: [{ text: userMessage }],
-    },
-  ];
+  const conversation: Message[] = [userMessage];
 
   const command = new ConverseCommand({
     modelId,
