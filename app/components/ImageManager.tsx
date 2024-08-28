@@ -5,9 +5,17 @@ import { useState, useEffect } from "react";
 
 interface ImageManagerProps {
   imagesPerRow: number;
+  autoRefresh: boolean;
+  refreshInterval: number;
+  //onAnalyze: (imageUrls: string[]) => void;
 }
 
-const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
+const ImageManager: React.FC<ImageManagerProps> = ({
+  imagesPerRow,
+  autoRefresh,
+  refreshInterval,
+  //onAnalyze,
+}) => {
   const [newImageUrl, setNewImageUrl] = useState<string>("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
@@ -15,6 +23,16 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
   useEffect(() => {
     loadImageUrls().then(setImageUrls);
   }, []);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        loadImageUrls().then(setImageUrls);
+      }, refreshInterval * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh, refreshInterval]);
 
   const addImageUrl = (url: string) => {
     const newUrls = [...imageUrls, url];
@@ -85,6 +103,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({ imagesPerRow }) => {
             width={300}
             height={225}
             quality={70}
+            priority={false}
             alt={`NSW Traffic Image ${index + 1}`}
             unoptimized
             onClick={() => {
