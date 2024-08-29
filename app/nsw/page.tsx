@@ -43,9 +43,6 @@ export default function NSWPage() {
         autoRefresh={autoRefresh}
         refreshInterval={refreshInterval}
       />
-      {/* <button onClick={() => handleInvokeBedrock("How are you?")}>
-        Invoke Bedrock
-      </button> */}
     </div>
   );
 }
