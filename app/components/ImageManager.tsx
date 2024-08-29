@@ -3,6 +3,7 @@ import Image from "next/image";
 import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
 import { useState, useEffect, useCallback } from "react";
 import { ContentBlock, Message } from "@aws-sdk/client-bedrock-runtime";
+import { TextField, Box, Button, Typography, Grid } from "@mui/material";
 
 interface ImageManagerProps {
   imagesPerRow: number;
@@ -86,17 +87,22 @@ const ImageManager: React.FC<ImageManagerProps> = ({
 
   return (
     <div>
-      <input
-        type="text"
+      <TextField
+        fullWidth
         value={newImageUrl}
         onChange={(e) => setNewImageUrl(e.target.value)}
         placeholder="Enter image URL"
+        margin="normal"
       />
-      <div>
-        <button onClick={handleAddImage}>Add Image</button>
-      </div>
-      <div>
-        <button
+      <Box mt={2}>
+        <Button variant="contained" onClick={handleAddImage}>
+          Add Image
+        </Button>
+      </Box>
+      <Box mt={2}>
+        <Button
+          variant="contained"
+          color="secondary"
           onClick={() => {
             const newUrls = imageUrls.filter(
               (_, index) => !selectedImages.includes(index)
@@ -107,45 +113,50 @@ const ImageManager: React.FC<ImageManagerProps> = ({
           }}
         >
           Remove Selected Images
-        </button>
-      </div>
-      <button onClick={() => handleInvokeBedrock()}>Invoke Bedrock</button>
-      <div>{imageAnalysis}</div>
-      <div
-        className="image-grid"
+        </Button>
+      </Box>
+      <Box mt={2}>
+        <Button variant="contained" onClick={() => handleInvokeBedrock()}>
+          Invoke Bedrock
+        </Button>
+      </Box>
+      <Typography variant="body1">{imageAnalysis}</Typography>
+      <Grid
+        container
+        spacing={2}
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${imagesPerRow}, 1fr)`,
+          marginTop: "16px",
         }}
       >
         {imageUrls.map((url, index) => (
-          <Image
-            key={index}
-            src={url}
-            width={300}
-            height={225}
-            quality={70}
-            priority={false}
-            alt={`NSW Traffic Image ${index + 1}`}
-            unoptimized
-            onClick={() => {
-              setSelectedImages((prev) =>
-                prev.includes(index)
-                  ? prev.filter((i) => i !== index)
-                  : [...prev, index]
-              );
-            }}
-            style={{
-              border: selectedImages.includes(index)
-                ? "2px solid red"
-                : "3px solid white",
-              objectFit: "cover",
-              width: "100%",
-              height: "auto",
-            }}
-          />
+          <Grid item xs={12 / imagesPerRow} key={index}>
+            <Image
+              src={url}
+              width={300}
+              height={225}
+              quality={70}
+              priority={false}
+              alt={`NSW Traffic Image ${index + 1}`}
+              unoptimized
+              onClick={() => {
+                setSelectedImages((prev) =>
+                  prev.includes(index)
+                    ? prev.filter((i) => i !== index)
+                    : [...prev, index]
+                );
+              }}
+              style={{
+                border: selectedImages.includes(index)
+                  ? "2px solid red"
+                  : "3px solid white",
+                objectFit: "cover",
+                width: "100%",
+                height: "auto",
+              }}
+            />
+          </Grid>
         ))}
-      </div>
+      </Grid>
     </div>
   );
 };

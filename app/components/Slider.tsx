@@ -1,18 +1,25 @@
 import React from 'react';
+import { Slider as MuiSlider, Typography } from '@mui/material';
 
 interface SliderProps {
   value: number;
   onChange: (value: number) => void;
   min: number;
   max: number;
+  label: string;
 }
 
-const Slider: React.FC<SliderProps> = ({ value, onChange, min, max }) => {
+const Slider: React.FC<SliderProps> = ({ value, onChange, min, max, label }) => {
   return (
-    <div>
-      <input type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))} />
-      <span>Images per row: {value}</span>
-    </div>
+    <>
+      <Typography gutterBottom>{label}: {value}</Typography>
+      <MuiSlider
+        value={value}
+        onChange={(_, newValue) => onChange(newValue as number)}
+        min={min}
+        max={max}
+      />
+    </>
   );
 };
 

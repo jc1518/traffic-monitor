@@ -1,13 +1,26 @@
-import Link from 'next/link';
+import { AppBar, Toolbar, Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const TopMenu = () => {
+  const router = useRouter();
+
   return (
-    <nav className="top-menu">
-  <Link href="/" className="top-menu-item">Home</Link>
-      <Link href="/nsw" className="top-menu-item">NSW</Link>
-      <Link href="/vic" className="top-menu-item">VIC</Link>
-      <Link href="/qld" className="top-menu-item">QLD</Link>
-    </nav>
+    <AppBar position="static">
+      <Toolbar>
+        <Button color="inherit" onClick={() => router.push("/")}>
+          Home
+        </Button>
+        <Button color="inherit" onClick={() => router.push("/nsw")}>
+          NSW
+        </Button>
+        <Button color="inherit" onClick={() => router.push("/vic")}>
+          VIC
+        </Button>
+        <Button color="inherit" onClick={() => router.push("/qld")}>
+          QLD
+        </Button>
+      </Toolbar>
+    </AppBar>
   );
 };
 

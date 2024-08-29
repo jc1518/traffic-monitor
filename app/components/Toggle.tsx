@@ -1,4 +1,5 @@
 import React from 'react';
+import { FormControlLabel, Switch } from '@mui/material';
 
 interface ToggleProps {
   value: boolean;
@@ -8,21 +9,7 @@ interface ToggleProps {
 
 const Toggle: React.FC<ToggleProps> = ({ value, onChange, label }) => {
   return (
-    <label className="toggle">
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span className="slider"></span>
-      <span className="label">{label}</span>
-      <style jsx>{`
-        .toggle { /* Add your toggle switch styles here */ }
-        .slider { /* Add your slider styles here */ }
-        .label { /* Add your label styles here */ }
-        input { /* Add your input styles here */ }
-      `}</style>
-    </label>
+    <FormControlLabel control={<Switch checked={value} onChange={(e) => onChange(e.target.checked)} />} label={label} />
   );
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { FormControl, InputLabel, Select as MuiSelect, MenuItem } from '@mui/material';
 
 interface SelectOption {
   value: number;
@@ -14,19 +15,20 @@ interface SelectProps {
 
 const Select: React.FC<SelectProps> = ({ options, value, onChange, label }) => {
   return (
-    <div className="select-container">
-      <label>{label}</label>
-      <select
+    <FormControl fullWidth>
+      <InputLabel>{label}</InputLabel>
+      <MuiSelect
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
+        label={label}
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <MenuItem key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </MenuItem>
         ))}
-      </select>
-    </div>
+      </MuiSelect>
+    </FormControl>
   );
 };
 
