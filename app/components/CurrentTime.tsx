@@ -1,31 +1,29 @@
 import React, { useState, useEffect } from "react";
 
-const CurrentTime: React.FC = () => {
+interface CurrentTimeProps {
+  timeZone: string;
+}
+
+const CurrentTime: React.FC<CurrentTimeProps> = ({ timeZone }) => {
   const [time, setTime] = useState<string | null>(null);
 
   const fetchTime = async () => {
-    try {
-      const response = await fetch("/api/time");
-      const data = await response.json();
-      setTime(data.time);
-    } catch (error) {
-      console.error("Error fetching time:", error);
-    }
+    const currentTime = new Date().toISOString();
+    const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
+      timeZone: timeZone,
+    });
+    setTime(localTime);
   };
 
-  // useEffect(() => {
-  //   fetchTime();
-  //   const interval = setInterval(fetchTime, 1000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  useEffect(() => {
+    fetchTime();
+    const interval = setInterval(fetchTime, 1000);
+    return () => clearInterval(interval);
+  });
 
   return (
     <div>
-      <p>
-        Current Time:{" "}
-        {time ? new Date(time).toLocaleTimeString() : "Loading..."}
-      </p>
-      <button onClick={() => fetchTime()}> refresh time </button>
+      <p>{time}</p>
     </div>
   );
 };

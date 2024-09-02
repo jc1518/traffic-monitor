@@ -6,12 +6,14 @@ import { ContentBlock, Message } from "@aws-sdk/client-bedrock-runtime";
 import { TextField, Box, Button, Typography, Grid } from "@mui/material";
 
 interface ImageManagerProps {
+  storageKey: string;
   imagesPerRow: number;
   autoRefresh: boolean;
   refreshInterval: number;
 }
 
 const ImageManager: React.FC<ImageManagerProps> = ({
+  storageKey,
   imagesPerRow,
   autoRefresh,
   refreshInterval,
@@ -22,29 +24,35 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
 
   useEffect(() => {
-    loadImageUrls().then(setImageUrls);
-  }, []);
+    loadImageUrls(storageKey).then(setImageUrls);
+  }, [storageKey]);
 
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(() => {
-        loadImageUrls().then(setImageUrls);
+        loadImageUrls(storageKey).then(setImageUrls);
       }, refreshInterval * 1000);
 
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, storageKey]);
 
   const addImageUrl = (url: string) => {
     const newUrls = [...imageUrls, url];
     setImageUrls(newUrls);
-    saveImageUrls(newUrls);
+    saveImageUrls(storageKey, newUrls);
   };
 
-  const removeImages = (index: number) => {
-    const newUrls = imageUrls.filter((_, i) => i !== index);
+  const removeImages = () => {
+    // const newUrls = imageUrls.filter((_, i) => i !== index);
+    // setImageUrls(newUrls);
+    // saveImageUrls(storageKey, newUrls);
+    const newUrls = imageUrls.filter(
+      (_, index) => !selectedImages.includes(index)
+    );
     setImageUrls(newUrls);
-    saveImageUrls(newUrls);
+    saveImageUrls(storageKey, newUrls);
+    setSelectedImages([]);
   };
 
   const handleAddImage = () => {
@@ -104,12 +112,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
           variant="contained"
           color="secondary"
           onClick={() => {
-            const newUrls = imageUrls.filter(
-              (_, index) => !selectedImages.includes(index)
-            );
-            setImageUrls(newUrls);
-            saveImageUrls(newUrls);
-            setSelectedImages([]);
+            removeImages();
           }}
         >
           Remove Selected Images

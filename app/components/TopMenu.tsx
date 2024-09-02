@@ -10,14 +10,14 @@ const TopMenu = () => {
         <Button color="inherit" onClick={() => router.push("/")}>
           Home
         </Button>
-        <Button color="inherit" onClick={() => router.push("/nsw")}>
-          NSW
+        <Button color="inherit" onClick={() => router.push("/sydney")}>
+          Sydney
         </Button>
-        <Button color="inherit" onClick={() => router.push("/vic")}>
-          VIC
+        <Button color="inherit" onClick={() => router.push("/melbourne")}>
+          Melbourne
         </Button>
-        <Button color="inherit" onClick={() => router.push("/qld")}>
-          QLD
+        <Button color="inherit" onClick={() => router.push("/brisbane")}>
+          Brisbane
         </Button>
       </Toolbar>
     </AppBar>

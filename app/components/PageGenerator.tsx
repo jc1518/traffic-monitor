@@ -9,9 +9,15 @@ import { Box, Container, Typography, Grid, Paper } from "@mui/material";
 
 interface PageGeneratorProps {
   greetingMessage: string;
+  timeZone: string;
+  storageKey: string;
 }
 
-const PageGenerator: React.FC<PageGeneratorProps> = ({ greetingMessage }) => {
+const PageGenerator: React.FC<PageGeneratorProps> = ({
+  greetingMessage,
+  timeZone,
+  storageKey,
+}) => {
   const [imagesPerRow, setImagesPerRow] = useState(3);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(15);
@@ -58,8 +64,9 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({ greetingMessage }) => {
           <Typography variant="h4" component="h1" gutterBottom>
             {greetingMessage}
           </Typography>
-          <CurrentTime />
+          <CurrentTime timeZone={timeZone} />
           <ImageManager
+            storageKey={storageKey}
             imagesPerRow={imagesPerRow}
             autoRefresh={autoRefresh}
             refreshInterval={refreshInterval}
