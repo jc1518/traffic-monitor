@@ -1,8 +1,8 @@
 import React from "react";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
 import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
 import { useState, useEffect, useCallback } from "react";
-import { ContentBlock, Message } from "@aws-sdk/client-bedrock-runtime";
 import { TextField, Box, Button, Typography, Grid } from "@mui/material";
 
 interface ImageManagerProps {
@@ -44,9 +44,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   };
 
   const removeImages = () => {
-    // const newUrls = imageUrls.filter((_, i) => i !== index);
-    // setImageUrls(newUrls);
-    // saveImageUrls(storageKey, newUrls);
     const newUrls = imageUrls.filter(
       (_, index) => !selectedImages.includes(index)
     );
@@ -95,35 +92,26 @@ const ImageManager: React.FC<ImageManagerProps> = ({
 
   return (
     <div>
-      <TextField
-        fullWidth
-        value={newImageUrl}
-        onChange={(e) => setNewImageUrl(e.target.value)}
-        placeholder="Enter image URL"
-        margin="normal"
-      />
-      <Box mt={2}>
+      <Box display="flex" alignItems="center" flexWrap="wrap" gap={2}>
+        <TextField
+          value={newImageUrl}
+          onChange={(e) => setNewImageUrl(e.target.value)}
+          placeholder="Enter image URL"
+          sx={{ flexGrow: 1 }}
+        />
         <Button variant="contained" onClick={handleAddImage}>
           Add Image
         </Button>
-      </Box>
-      <Box mt={2}>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={() => {
-            removeImages();
-          }}
-        >
-          Remove Selected Images
+        <Button variant="contained" color="secondary" onClick={removeImages}>
+          Remove Selected
         </Button>
-      </Box>
-      <Box mt={2}>
-        <Button variant="contained" onClick={() => handleInvokeBedrock()}>
+        <Button variant="contained" onClick={handleInvokeBedrock}>
           Invoke Bedrock
         </Button>
       </Box>
-      <Typography variant="body1">{imageAnalysis}</Typography>
+      <Typography variant="body1" mt={2}>
+        <ReactMarkdown>{imageAnalysis}</ReactMarkdown>{" "}
+      </Typography>
       <Grid
         container
         spacing={2}
