@@ -122,12 +122,12 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         {imageUrls.map((url, index) => (
           <Grid item xs={12 / imagesPerRow} key={index}>
             <Image
-              src={url}
+              src={`${url}?${new Date().getTime()}`}
               width={300}
               height={225}
               quality={70}
-              priority={false}
-              alt={`NSW Traffic Image ${index + 1}`}
+              priority={true}
+              alt={`Image ${index + 1}`}
               unoptimized
               onClick={() => {
                 setSelectedImages((prev) =>
