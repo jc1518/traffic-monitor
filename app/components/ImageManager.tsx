@@ -1,27 +1,48 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { saveImageUrls, loadImageUrls } from "../utils/imageStorage";
-import { useState, useEffect, useCallback } from "react";
-import { TextField, Box, Button, Typography, Grid } from "@mui/material";
+import {
+  TextField,
+  Container,
+  Box,
+  Button,
+  Typography,
+  Grid,
+  Switch,
+  Select,
+  MenuItem,
+  Slider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  IconButton,
+} from "@mui/material";
+import {
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Clear as ClearIcon,
+} from "@mui/icons-material";
 
 interface ImageManagerProps {
   storageKey: string;
-  imagesPerRow: number;
-  autoRefresh: boolean;
-  refreshInterval: number;
 }
 
-const ImageManager: React.FC<ImageManagerProps> = ({
-  storageKey,
-  imagesPerRow,
-  autoRefresh,
-  refreshInterval,
-}) => {
+const drawerWidth = 240;
+
+const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
   const [newImageUrl, setNewImageUrl] = useState<string>("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
+
+  const [imagesPerRow, setImagesPerRow] = useState(3);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(15);
 
   useEffect(() => {
     loadImageUrls(storageKey).then(setImageUrls);
@@ -44,6 +65,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   };
 
   const removeImages = () => {
+    if (selectedImages.length === 0) {
+      alert("Please select one ore more cameras to remove.");
+      return;
+    }
     const newUrls = imageUrls.filter(
       (_, index) => !selectedImages.includes(index)
     );
@@ -91,64 +116,145 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   }, [imageUrls]);
 
   return (
-    <div>
-      <Box display="flex" alignItems="center" flexWrap="wrap" gap={2}>
-        <TextField
-          value={newImageUrl}
-          onChange={(e) => setNewImageUrl(e.target.value)}
-          placeholder="Enter image URL"
-          sx={{ flexGrow: 1 }}
-        />
-        <Button variant="contained" onClick={handleAddImage}>
-          Add Image
-        </Button>
-        <Button variant="contained" color="secondary" onClick={removeImages}>
-          Remove Selected
-        </Button>
-        <Button variant="contained" onClick={handleInvokeBedrock}>
-          Invoke Bedrock
-        </Button>
-      </Box>
-      <Typography variant="body1" mt={2}>
-        <ReactMarkdown>{imageAnalysis}</ReactMarkdown>{" "}
-      </Typography>
-      <Grid
-        container
-        spacing={2}
-        style={{
-          marginTop: "16px",
-        }}
-      >
-        {imageUrls.map((url, index) => (
-          <Grid item xs={12 / imagesPerRow} key={index}>
-            <Image
-              src={`${url}?${new Date().getTime()}`}
-              width={300}
-              height={225}
-              quality={70}
-              priority={true}
-              alt={`Image ${index + 1}`}
-              unoptimized
-              onClick={() => {
-                setSelectedImages((prev) =>
-                  prev.includes(index)
-                    ? prev.filter((i) => i !== index)
-                    : [...prev, index]
-                );
-              }}
-              style={{
-                border: selectedImages.includes(index)
-                  ? "2px solid red"
-                  : "3px solid white",
-                objectFit: "cover",
-                width: "100%",
-                height: "auto",
-              }}
-            />
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <Box sx={{ display: "flex" }}>
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              position: "relative",
+              height: "auto",
+            },
+          }}
+        >
+          <List>
+            <ListItem>
+              <ListItemText primary="Auto Refresh" />
+              <Switch
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+              />
+            </ListItem>
+            <ListItem>
+              <Select
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                fullWidth
+              >
+                <MenuItem value={15}>15 seconds</MenuItem>
+                <MenuItem value={60}>1 minute</MenuItem>
+                <MenuItem value={300}>5 minutes</MenuItem>
+              </Select>
+            </ListItem>
+            <ListItem>
+              <Typography gutterBottom>
+                Cameras per row: {imagesPerRow}
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Slider
+                value={imagesPerRow}
+                onChange={(_, value) => setImagesPerRow(value as number)}
+                min={1}
+                max={10}
+                step={1}
+              />
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <TextField
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="Enter camera URL"
+                fullWidth
+              />
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                onClick={handleAddImage}
+                startIcon={<AddIcon />}
+                fullWidth
+              >
+                Add Camera
+              </Button>
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={removeImages}
+                startIcon={<DeleteIcon />}
+                fullWidth
+              >
+                Remove Cameras
+              </Button>
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                onClick={handleInvokeBedrock}
+                startIcon={<VisibilityIcon />}
+                fullWidth
+              >
+                Check Cameras
+              </Button>
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                onClick={() => setImageAnalysis("")}
+                startIcon={<ClearIcon />}
+                fullWidth
+              >
+                Clear Output
+              </Button>
+            </ListItem>
+          </List>
+        </Drawer>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <Typography variant="body1" mb={2}>
+            <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
+          </Typography>
+          <Grid container spacing={2}>
+            {imageUrls.map((url, index) => (
+              <Grid item xs={12 / imagesPerRow} key={index}>
+                <Image
+                  src={`${url}?${new Date().getTime()}`}
+                  width={300}
+                  height={225}
+                  quality={70}
+                  priority={true}
+                  alt={`Image ${index + 1}`}
+                  unoptimized
+                  onClick={() => {
+                    setSelectedImages((prev) =>
+                      prev.includes(index)
+                        ? prev.filter((i) => i !== index)
+                        : [...prev, index]
+                    );
+                  }}
+                  style={{
+                    border: selectedImages.includes(index)
+                      ? "2px solid #1976d2"
+                      : "2px solid transparent",
+                    objectFit: "cover",
+                    width: "100%",
+                    height: "auto",
+                    borderRadius: "4px",
+                    transition: "border-color 0.3s ease",
+                  }}
+                />
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
