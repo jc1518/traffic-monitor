@@ -114,7 +114,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
 
   const handleInvokeBedrock = useCallback(async () => {
     try {
-      setImageAnalysis("Checking...");
+      setImageAnalysis("Checking cameras...");
       const currentTime = new Date().toISOString();
       const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
         timeZone: timeZone,
@@ -289,10 +289,16 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               </Grid>
             ))}
           </Grid>
-          <Typography variant="body1" mb={2}>
-            {time}
-            <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
-          </Typography>
+          <Box
+            sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}
+          >
+            <Typography variant="body1" mb={2}>
+              {time}
+            </Typography>
+            <Typography variant="body1" mt={2}>
+              <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Box>
