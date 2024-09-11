@@ -30,19 +30,26 @@ import {
 
 interface ImageManagerProps {
   storageKey: string;
+  timeZone: string;
 }
 
 const drawerWidth = 240;
 
-const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
+const ImageManager: React.FC<ImageManagerProps> = ({
+  storageKey,
+  timeZone,
+}) => {
   const [newImageUrl, setNewImageUrl] = useState<string>("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
+  const [time, setTime] = useState<string>("");
 
   const [imagesPerRow, setImagesPerRow] = useState(3);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(15);
+  const [autoDetect, setAutoDetect] = useState(false);
+  const [detectInterval, setDetectInterval] = useState(60);
 
   useEffect(() => {
     loadImageUrls(storageKey).then(setImageUrls);
@@ -57,6 +64,16 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
       return () => clearInterval(interval);
     }
   }, [autoRefresh, refreshInterval, storageKey]);
+
+  useEffect(() => {
+    if (autoDetect) {
+      const interval = setInterval(() => {
+        handleInvokeBedrock();
+      }, detectInterval * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [autoDetect, detectInterval]);
 
   const addImageUrl = (url: string) => {
     const newUrls = [...imageUrls, url];
@@ -98,6 +115,11 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
   const handleInvokeBedrock = useCallback(async () => {
     try {
       setImageAnalysis("Checking...");
+      const currentTime = new Date().toISOString();
+      const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
+        timeZone: timeZone,
+      });
+      setTime(localTime);
       const response = await fetch("/api/bedrock", {
         method: "POST",
         headers: {
@@ -113,7 +135,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
     } catch (error) {
       setImageAnalysis(`${error}`);
     }
-  }, [imageUrls]);
+  }, [imageUrls, timeZone]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -147,6 +169,24 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
               >
                 <MenuItem value={15}>15 seconds</MenuItem>
                 <MenuItem value={60}>1 minute</MenuItem>
+                <MenuItem value={300}>5 minutes</MenuItem>
+              </Select>
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Auto Detect" />
+              <Switch
+                checked={autoDetect}
+                onChange={(e) => setAutoDetect(e.target.checked)}
+              />
+            </ListItem>
+            <ListItem>
+              <Select
+                value={detectInterval}
+                onChange={(e) => setDetectInterval(Number(e.target.value))}
+                fullWidth
+              >
+                <MenuItem value={60}>1 minute</MenuItem>
+                <MenuItem value={180}>3 minute</MenuItem>
                 <MenuItem value={300}>5 minutes</MenuItem>
               </Select>
             </ListItem>
@@ -217,9 +257,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
           </List>
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Typography variant="body1" mb={2}>
-            <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
-          </Typography>
           <Grid container spacing={2}>
             {imageUrls.map((url, index) => (
               <Grid item xs={12 / imagesPerRow} key={index}>
@@ -252,6 +289,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({ storageKey }) => {
               </Grid>
             ))}
           </Grid>
+          <Typography variant="body1" mb={2}>
+            {time}
+            <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
+          </Typography>
         </Box>
       </Box>
     </Box>
