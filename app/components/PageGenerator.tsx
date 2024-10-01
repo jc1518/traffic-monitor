@@ -45,9 +45,10 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
             <Paper
               elevation={2}
               sx={{
-                padding: "16px",
-                borderRadius: "8px",
+                padding: "8px",
+                borderRadius: "4px",
                 backgroundColor: "white",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
               }}
             >
               <CurrentTime timeZone={timeZone} />

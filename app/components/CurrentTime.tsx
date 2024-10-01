@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Box, Typography } from "@mui/material";
 
 interface CurrentTimeProps {
   timeZone: string;
@@ -22,9 +23,15 @@ const CurrentTime: React.FC<CurrentTimeProps> = ({ timeZone }) => {
   });
 
   return (
-    <div>
-      <p>{time}</p>
-    </div>
+    <Box
+      sx={{
+        textAlign: "center",
+        padding: "2px",
+        borderRadius: "2px",
+      }}
+    >
+      <Typography variant="h6">{time}</Typography>
+    </Box>
   );
 };
 
