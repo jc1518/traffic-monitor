@@ -1,41 +1,62 @@
 import {
   BedrockRuntimeClient,
   ConverseCommand,
+  ConverseStreamCommand,
   Message,
 } from "@aws-sdk/client-bedrock-runtime";
-import { fromIni } from "@aws-sdk/credential-providers";
 
-const client = new BedrockRuntimeClient({
-  region: "us-west-2",
-  credentials: fromIni(),
-});
+export async function converseStreamWithModel(
+  region: string,
+  modelId: string,
+  messages: Message[]
+) {
+  const bedrockClient = new BedrockRuntimeClient({
+    region: region,
+  });
+  const conversation: Message[] = messages;
 
-export async function converseWithModel(userMessage: Message) {
-  const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
-  //const modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0";
-  const conversation: Message[] = [userMessage];
-
-  const command = new ConverseCommand({
+  const command = new ConverseStreamCommand({
     modelId,
     messages: conversation,
     inferenceConfig: {
-      maxTokens: 512,
+      maxTokens: 4096,
       temperature: 0.5,
       topP: 0.9,
     },
   });
 
   try {
-    const response = await client.send(command);
-    if (
-      response.output &&
-      response.output.message &&
-      response.output.message.content &&
-      response.output.message.content.length > 0
-    ) {
-      return response.output.message.content[0].text;
-    }
-    return "No response text";
+    const response = await bedrockClient.send(command);
+    return response;
+  } catch (err) {
+    console.error(`ERROR: Can't invoke '${modelId}'. Reason: ${err}`);
+    throw new Error("Failed to invoke model");
+  }
+}
+
+export async function converseWithModel(
+  region: string,
+  modelId: string,
+  messages: Message[]
+) {
+  const bedrockClient = new BedrockRuntimeClient({
+    region: region,
+  });
+  const conversation: Message[] = messages;
+
+  const command = new ConverseCommand({
+    modelId,
+    messages: conversation,
+    inferenceConfig: {
+      maxTokens: 4096,
+      temperature: 0.5,
+      topP: 0.9,
+    },
+  });
+
+  try {
+    const response = await bedrockClient.send(command);
+    return response;
   } catch (err) {
     console.error(`ERROR: Can't invoke '${modelId}'. Reason: ${err}`);
     throw new Error("Failed to invoke model");

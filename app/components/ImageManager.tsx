@@ -113,27 +113,51 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   };
 
   const handleInvokeBedrock = useCallback(async () => {
-    try {
-      setImageAnalysis("Checking cameras...");
-      const currentTime = new Date().toISOString();
-      const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
-        timeZone: timeZone,
-      });
-      setTime(localTime);
-      const response = await fetch("/api/bedrock", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imageUrls: imageUrls }),
-      });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+    setImageAnalysis("Checking cameras...");
+    const currentTime = new Date().toISOString();
+    const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
+      timeZone: timeZone,
+    });
+    setTime(localTime);
+    const response = await fetch("/api/bedrock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrls: imageUrls }),
+    });
+    if (!response!.ok) {
+      console.error("Response status:", response!.status);
+      console.error("Response headers:", Object.fromEntries(response!.headers));
+      throw new Error(`HTTP error! status: ${response!.status}`);
+    }
+    const reader = response!.body?.getReader();
+    console.log(response);
+    let result = "";
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = new TextDecoder("utf-8").decode(value);
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line);
+
+            if (data.type === "chunk" && data.content) {
+              result += data.content;
+              setImageAnalysis(result);
+            } else if (data.type === "error") {
+              console.error("Stream error:", data.message);
+              setImageAnalysis("Sorry, there was an error. Please try again.");
+            }
+          } catch (e) {
+            console.error("Error parsing JSON:", e);
+          }
+        }
       }
-      const responseData = await response.json();
-      setImageAnalysis(responseData.reply);
-    } catch (error) {
-      setImageAnalysis(`${error}`);
     }
   }, [imageUrls, timeZone]);
 

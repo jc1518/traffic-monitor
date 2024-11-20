@@ -1,4 +1,4 @@
-import { converseWithModel } from "../../utils/bedrockService";
+import { converseStreamWithModel } from "../../utils/bedrockService";
 import { NextRequest, NextResponse } from "next/server";
 import { ContentBlock, Message } from "@aws-sdk/client-bedrock-runtime";
 
@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const bedrockRegion = "us-west-2";
+
+    // const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
+    const modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0";
+
     const prompt = `
     Analyze the given images for traffic incidents or disruptions.
 
@@ -59,16 +64,46 @@ export async function POST(req: NextRequest) {
 
     const message: Message = {
       role: "user",
-      content: content as unknown as ContentBlock[],
+      content: content as ContentBlock[],
     };
 
-    const responseText = await converseWithModel(message);
-    console.log(responseText);
-    return NextResponse.json({ reply: responseText }, { status: 200 });
-  } catch (err) {
-    console.error(err);
+    const responseStream = await converseStreamWithModel(
+      bedrockRegion,
+      modelId,
+      [message]
+    );
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of responseStream.stream!) {
+            if (chunk.contentBlockDelta?.delta?.text) {
+              const text = chunk.contentBlockDelta?.delta?.text;
+              if (text) {
+                const encoder = new TextEncoder();
+                controller.enqueue(
+                  encoder.encode(
+                    JSON.stringify({
+                      type: "chunk",
+                      content: chunk.contentBlockDelta.delta.text,
+                    }) + "\n"
+                  )
+                );
+              }
+            }
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new NextResponse(stream);
+  } catch (error) {
+    console.error("Error processing request:", error);
     return NextResponse.json(
-      { error: "Failed to invoke model" },
+      { error: "Failed to process request" },
       { status: 500 }
     );
   }
