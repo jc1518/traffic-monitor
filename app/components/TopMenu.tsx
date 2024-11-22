@@ -7,17 +7,17 @@ const TopMenu = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Button color="inherit" onClick={() => router.push("/")}>
-          Home
+        <Button color="inherit" onClick={() => router.push("/inner_sydney")}>
+          Inner Sydney
         </Button>
-        <Button color="inherit" onClick={() => router.push("/sydney")}>
-          Sydney
+        <Button color="inherit" onClick={() => router.push("/sydney_north")}>
+          Sydney North
         </Button>
-        <Button color="inherit" onClick={() => router.push("/melbourne")}>
-          Melbourne
+        <Button color="inherit" onClick={() => router.push("/sydney_west")}>
+          Sydney West
         </Button>
-        <Button color="inherit" onClick={() => router.push("/brisbane")}>
-          Brisbane
+        <Button color="inherit" onClick={() => router.push("/sydney_south")}>
+          Sydney South
         </Button>
       </Toolbar>
     </AppBar>
