@@ -16,11 +16,11 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
   storageKey,
 }) => {
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Paper
         elevation={3}
         sx={{
-          padding: "32px",
+          padding: "16px",
           borderRadius: "12px",
           mb: 4,
           backgroundColor: "#f8f9fa",
@@ -38,7 +38,7 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
               {greetingMessage}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Traffic Monitoring Dashboard
+              AI-Enhanced Traffic Flow Monitoring
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -46,9 +46,10 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
               elevation={2}
               sx={{
                 padding: "8px",
-                borderRadius: "4px",
+                borderRadius: "12px",
                 backgroundColor: "white",
                 boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                textAlign: "center",
               }}
             >
               <CurrentTime timeZone={timeZone} />

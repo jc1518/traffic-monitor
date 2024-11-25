@@ -24,6 +24,7 @@ import {
   RadioGroup,
   Radio,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -31,9 +32,8 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
   Clear as ClearIcon,
+  DirectionsRun as DirectionsRunIcon,
 } from "@mui/icons-material";
-import CircularProgress from "@mui/material/CircularProgress";
-
 interface ImageManagerProps {
   storageKey: string;
   timeZone: string;
@@ -50,7 +50,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
   const [time, setTime] = useState<string>("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   const [imagesPerRow, setImagesPerRow] = useState(2);
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -183,7 +183,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
       <Button onClick={() => setIsDrawerOpen((prev) => !prev)}>
-        Camera Settings
+        {isDrawerOpen ? "Hide Camera Settings" : "Open Camera Settings"}
       </Button>
       <Box sx={{ display: "flex" }}>
         <Drawer
@@ -302,7 +302,11 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                 variant="contained"
                 onClick={handleInvokeBedrock}
                 startIcon={
-                  loading ? <CircularProgress size={20} /> : <VisibilityIcon />
+                  loading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <DirectionsRunIcon />
+                  )
                 }
                 fullWidth
                 disabled={loading}
@@ -315,6 +319,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                 variant="contained"
                 onClick={() => setShowAnalysis((prev) => !prev)}
                 fullWidth
+                startIcon={<VisibilityIcon />}
               >
                 {showAnalysis ? "Hide Analysis" : "Show Analysis"}
               </Button>
