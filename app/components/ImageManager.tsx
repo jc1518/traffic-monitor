@@ -50,6 +50,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
   const [time, setTime] = useState<string>("");
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
 
   const [imagesPerRow, setImagesPerRow] = useState(2);
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -59,8 +60,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [alarmThreshold, setAlarmThreshold] = useState<number | null>(3);
-
-  const [imageScores, setImageScores] = useState<number[]>([]);
 
   const alarmOptions = [
     { value: 1, label: "Very light traffic, free-flowing" },
@@ -93,11 +92,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       return () => clearInterval(interval);
     }
   }, [autoDetect, detectInterval]);
-
-  useEffect(() => {
-    const scores = getImageScore();
-    setImageScores(scores);
-  }, [imageAnalysis]);
 
   const addImageUrl = (url: string) => {
     const newUrls = [...imageUrls, url];
@@ -186,21 +180,14 @@ const ImageManager: React.FC<ImageManagerProps> = ({
     setLoading(false);
   }, [imageUrls, timeZone]);
 
-  const getImageScore = () => {
-    try {
-      const analysis = JSON.parse(imageAnalysis);
-      return analysis.scores || [];
-    } catch (error) {
-      console.error("Error parsing imageAnalysis:", error);
-      return [];
-    }
-  };
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <Button onClick={() => setIsDrawerOpen((prev) => !prev)}>
+        Camera Settings
+      </Button>
       <Box sx={{ display: "flex" }}>
         <Drawer
-          variant="permanent"
+          variant={isDrawerOpen ? "permanent" : "temporary"}
           sx={{
             width: drawerWidth,
             flexShrink: 0,
@@ -209,6 +196,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               boxSizing: "border-box",
               position: "relative",
               height: "auto",
+              display: isDrawerOpen ? "block" : "none",
             },
           }}
         >
@@ -345,59 +333,36 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid container spacing={2}>
-            {imageUrls.map((url, index) => {
-              const score = imageScores[index] || 0;
-
-              return (
-                <Grid
-                  item
-                  xs={12 / imagesPerRow}
-                  key={index}
-                  style={{ position: "relative" }}
-                >
-                  <Image
-                    src={`${url}?${new Date().getTime()}`}
-                    width={300}
-                    height={225}
-                    quality={70}
-                    priority={true}
-                    alt={`Image ${index + 1}`}
-                    unoptimized
-                    onClick={() => {
-                      setSelectedImages((prev) =>
-                        prev.includes(index)
-                          ? prev.filter((i) => i !== index)
-                          : [...prev, index]
-                      );
-                    }}
-                    style={{
-                      border: selectedImages.includes(index)
-                        ? "2px solid #1976d2"
-                        : "2px solid transparent",
-                      objectFit: "cover",
-                      width: "100%",
-                      height: "auto",
-                      borderRadius: "4px",
-                      transition: "border-color 0.3s ease",
-                    }}
-                  />
-                  {score >= (alarmThreshold || 0) && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        border: "4px solid red",
-                        borderRadius: "4px",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                </Grid>
-              );
-            })}
+            {imageUrls.map((url, index) => (
+              <Grid item xs={12 / imagesPerRow} key={index}>
+                <Image
+                  src={`${url}?${new Date().getTime()}`}
+                  width={300}
+                  height={225}
+                  quality={70}
+                  priority={true}
+                  alt={`Image ${index + 1}`}
+                  unoptimized
+                  onClick={() => {
+                    setSelectedImages((prev) =>
+                      prev.includes(index)
+                        ? prev.filter((i) => i !== index)
+                        : [...prev, index]
+                    );
+                  }}
+                  style={{
+                    border: selectedImages.includes(index)
+                      ? "2px solid #1976d2"
+                      : "2px solid transparent",
+                    objectFit: "cover",
+                    width: "100%",
+                    height: "auto",
+                    borderRadius: "4px",
+                    transition: "border-color 0.3s ease",
+                  }}
+                />
+              </Grid>
+            ))}
           </Grid>
           <Box
             sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}

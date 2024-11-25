@@ -60,15 +60,6 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
         elevation={3}
         sx={{ padding: "32px", borderRadius: "12px", backgroundColor: "white" }}
       >
-        <Typography
-          variant="h5"
-          component="h2"
-          gutterBottom
-          fontWeight="medium"
-          color="primary"
-        >
-          Camera Settings
-        </Typography>
         <Grid container>
           <Grid item xs={12}>
             <ImageManager storageKey={storageKey} timeZone={timeZone} />
