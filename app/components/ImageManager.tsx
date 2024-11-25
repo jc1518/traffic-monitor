@@ -45,7 +45,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [imageAnalysis, setImageAnalysis] = useState<string>("");
   const [time, setTime] = useState<string>("");
 
-  const [imagesPerRow, setImagesPerRow] = useState(3);
+  const [imagesPerRow, setImagesPerRow] = useState(2);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(15);
   const [autoDetect, setAutoDetect] = useState(false);
@@ -132,7 +132,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       throw new Error(`HTTP error! status: ${response!.status}`);
     }
     const reader = response!.body?.getReader();
-    console.log(response);
     let result = "";
     if (reader) {
       while (true) {
@@ -160,6 +159,15 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       }
     }
   }, [imageUrls, timeZone]);
+
+  const getImageScore = () => {
+    try {
+      const analysis = JSON.parse(imageAnalysis);
+      return analysis.scores || []; // Assuming scores is an array in the JSON
+    } catch {
+      return []; // Return an empty array if parsing fails
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -281,7 +289,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
           </List>
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Grid container spacing={2}>
+          {/* <Grid container spacing={2}>
             {imageUrls.map((url, index) => (
               <Grid item xs={12 / imagesPerRow} key={index}>
                 <Image
@@ -312,6 +320,44 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                 />
               </Grid>
             ))}
+          </Grid> */}
+          <Grid container spacing={2}>
+            {imageUrls.map((url, index) => {
+              const scores = getImageScore();
+              const score = scores[index] || 0; // Get score for the current image
+              return (
+                <Grid item xs={12 / imagesPerRow} key={index}>
+                  <Image
+                    src={`${url}?${new Date().getTime()}`}
+                    width={300}
+                    height={225}
+                    quality={70}
+                    priority={true}
+                    alt={`Image ${index + 1}`}
+                    unoptimized
+                    onClick={() => {
+                      setSelectedImages((prev) =>
+                        prev.includes(index)
+                          ? prev.filter((i) => i !== index)
+                          : [...prev, index]
+                      );
+                    }}
+                    style={{
+                      border: selectedImages.includes(index)
+                        ? "2px solid #1976d2"
+                        : score > 2
+                        ? "4px solid red" // Bold red border for scores > 2
+                        : "2px solid transparent",
+                      objectFit: "cover",
+                      width: "100%",
+                      height: "auto",
+                      borderRadius: "4px",
+                      transition: "border-color 0.3s ease",
+                    }}
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
           <Box
             sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}
@@ -320,7 +366,11 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               {time}
             </Typography>
             <Typography variant="body1" mt={2}>
-              <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
+              <ReactMarkdown>
+                {typeof imageAnalysis === "string"
+                  ? imageAnalysis
+                  : JSON.stringify(imageAnalysis)}
+              </ReactMarkdown>
             </Typography>
           </Box>
         </Box>
