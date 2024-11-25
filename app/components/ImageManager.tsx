@@ -19,6 +19,11 @@ import {
   ListItemText,
   Divider,
   IconButton,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  InputLabel,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -27,6 +32,7 @@ import {
   Visibility as VisibilityIcon,
   Clear as ClearIcon,
 } from "@mui/icons-material";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface ImageManagerProps {
   storageKey: string;
@@ -50,6 +56,19 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [refreshInterval, setRefreshInterval] = useState(15);
   const [autoDetect, setAutoDetect] = useState(false);
   const [detectInterval, setDetectInterval] = useState(60);
+  const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [alarmThreshold, setAlarmThreshold] = useState<number | null>(3);
+
+  const [imageScores, setImageScores] = useState<number[]>([]);
+
+  const alarmOptions = [
+    { value: 1, label: "Very light traffic, free-flowing" },
+    { value: 2, label: "Light traffic, minimal slowdowns" },
+    { value: 3, label: "Moderate traffic, some congestion" },
+    { value: 4, label: "Heavy traffic, significant slowdowns" },
+    { value: 5, label: "Severe traffic, gridlock or near-standstill" },
+  ];
 
   useEffect(() => {
     loadImageUrls(storageKey).then(setImageUrls);
@@ -74,6 +93,11 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       return () => clearInterval(interval);
     }
   }, [autoDetect, detectInterval]);
+
+  useEffect(() => {
+    const scores = getImageScore();
+    setImageScores(scores);
+  }, [imageAnalysis]);
 
   const addImageUrl = (url: string) => {
     const newUrls = [...imageUrls, url];
@@ -113,6 +137,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   };
 
   const handleInvokeBedrock = useCallback(async () => {
+    setLoading(true);
     setImageAnalysis("Checking cameras...");
     const currentTime = new Date().toISOString();
     const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
@@ -158,14 +183,16 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         }
       }
     }
+    setLoading(false);
   }, [imageUrls, timeZone]);
 
   const getImageScore = () => {
     try {
       const analysis = JSON.parse(imageAnalysis);
-      return analysis.scores || []; // Assuming scores is an array in the JSON
-    } catch {
-      return []; // Return an empty array if parsing fails
+      return analysis.scores || [];
+    } catch (error) {
+      console.error("Error parsing imageAnalysis:", error);
+      return [];
     }
   };
 
@@ -223,6 +250,22 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               </Select>
             </ListItem>
             <ListItem>
+              <FormControl fullWidth>
+                <label htmlFor="alarm-threshold-select">Alarm Threshold</label>
+                <Select
+                  id="alarm-threshold-select"
+                  value={alarmThreshold?.toString() || ""}
+                  onChange={(e) => setAlarmThreshold(Number(e.target.value))}
+                >
+                  {alarmOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </ListItem>
+            <ListItem>
               <Typography gutterBottom>
                 Cameras per row: {imagesPerRow}
               </Typography>
@@ -270,10 +313,22 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               <Button
                 variant="contained"
                 onClick={handleInvokeBedrock}
-                startIcon={<VisibilityIcon />}
+                startIcon={
+                  loading ? <CircularProgress size={20} /> : <VisibilityIcon />
+                }
+                fullWidth
+                disabled={loading}
+              >
+                {loading ? "Checking..." : "Check Cameras"}
+              </Button>
+            </ListItem>
+            <ListItem>
+              <Button
+                variant="contained"
+                onClick={() => setShowAnalysis((prev) => !prev)}
                 fullWidth
               >
-                Check Cameras
+                {showAnalysis ? "Hide Analysis" : "Show Analysis"}
               </Button>
             </ListItem>
             <ListItem>
@@ -289,44 +344,17 @@ const ImageManager: React.FC<ImageManagerProps> = ({
           </List>
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          {/* <Grid container spacing={2}>
-            {imageUrls.map((url, index) => (
-              <Grid item xs={12 / imagesPerRow} key={index}>
-                <Image
-                  src={`${url}?${new Date().getTime()}`}
-                  width={300}
-                  height={225}
-                  quality={70}
-                  priority={true}
-                  alt={`Image ${index + 1}`}
-                  unoptimized
-                  onClick={() => {
-                    setSelectedImages((prev) =>
-                      prev.includes(index)
-                        ? prev.filter((i) => i !== index)
-                        : [...prev, index]
-                    );
-                  }}
-                  style={{
-                    border: selectedImages.includes(index)
-                      ? "2px solid #1976d2"
-                      : "2px solid transparent",
-                    objectFit: "cover",
-                    width: "100%",
-                    height: "auto",
-                    borderRadius: "4px",
-                    transition: "border-color 0.3s ease",
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid> */}
           <Grid container spacing={2}>
             {imageUrls.map((url, index) => {
-              const scores = getImageScore();
-              const score = scores[index] || 0; // Get score for the current image
+              const score = imageScores[index] || 0;
+
               return (
-                <Grid item xs={12 / imagesPerRow} key={index}>
+                <Grid
+                  item
+                  xs={12 / imagesPerRow}
+                  key={index}
+                  style={{ position: "relative" }}
+                >
                   <Image
                     src={`${url}?${new Date().getTime()}`}
                     width={300}
@@ -345,8 +373,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                     style={{
                       border: selectedImages.includes(index)
                         ? "2px solid #1976d2"
-                        : score > 2
-                        ? "4px solid red" // Bold red border for scores > 2
                         : "2px solid transparent",
                       objectFit: "cover",
                       width: "100%",
@@ -355,6 +381,20 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                       transition: "border-color 0.3s ease",
                     }}
                   />
+                  {score >= (alarmThreshold || 0) && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        border: "4px solid red",
+                        borderRadius: "4px",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
                 </Grid>
               );
             })}
@@ -362,15 +402,13 @@ const ImageManager: React.FC<ImageManagerProps> = ({
           <Box
             sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}
           >
-            <Typography variant="body1" mb={2}>
+            <Typography
+              variant="body1"
+              mt={2}
+              style={{ display: showAnalysis ? "block" : "none" }}
+            >
               {time}
-            </Typography>
-            <Typography variant="body1" mt={2}>
-              <ReactMarkdown>
-                {typeof imageAnalysis === "string"
-                  ? imageAnalysis
-                  : JSON.stringify(imageAnalysis)}
-              </ReactMarkdown>
+              <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
             </Typography>
           </Box>
         </Box>

@@ -69,7 +69,11 @@ const PageGenerator: React.FC<PageGeneratorProps> = ({
         >
           Camera Settings
         </Typography>
-        <ImageManager storageKey={storageKey} timeZone={timeZone} />
+        <Grid container>
+          <Grid item xs={12}>
+            <ImageManager storageKey={storageKey} timeZone={timeZone} />
+          </Grid>
+        </Grid>
       </Paper>
     </Container>
   );
