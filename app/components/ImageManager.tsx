@@ -52,16 +52,16 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [imageAnalysis, setImageAnalysis] = useState<{
     status: string;
     time?: string;
-  }>({ status: "ready" });
+  }>({ status: "" });
   useState<{ status: string; time?: string } | null>(null);
   const [time, setTime] = useState<string>("");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   const [imagesPerRow, setImagesPerRow] = useState(2);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(60);
+  const [refreshInterval, setRefreshInterval] = useState(30);
   const [autoDetect, setAutoDetect] = useState(false);
-  const [detectInterval, setDetectInterval] = useState(60);
+  const [detectInterval, setDetectInterval] = useState(30);
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [alarmThreshold, setAlarmThreshold] = useState<number>(3);
@@ -145,7 +145,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
 
   const handleInvokeBedrock = useCallback(async () => {
     setLoading(true);
-    setImageAnalysis({ status: "checking cameras..." });
+    setImageAnalysis({ status: "checking cameras" });
     const currentTime = new Date().toISOString();
     const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
       timeZone: timeZone,
@@ -166,7 +166,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({
     const responseData = await response.json();
     let result;
     try {
-      result = { time: localTime, status: JSON.parse(responseData.reply) };
+      result = {
+        time: localTime,
+        status: JSON.parse(responseData.reply.replace(/[\n\r\t]/g, "\\$&")),
+      };
     } catch (err) {
       console.error("Error parsing JSON:", err);
       setImageAnalysis({ status: `error - ${err}`, time: localTime });
@@ -218,7 +221,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                 onChange={(e) => setRefreshInterval(Number(e.target.value))}
                 fullWidth
               >
-                <MenuItem value={15}>15 seconds</MenuItem>
+                <MenuItem value={30}>30 seconds</MenuItem>
                 <MenuItem value={60}>1 minute</MenuItem>
                 <MenuItem value={300}>5 minutes</MenuItem>
               </Select>
@@ -236,6 +239,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                 onChange={(e) => setDetectInterval(Number(e.target.value))}
                 fullWidth
               >
+                <MenuItem value={30}>30 seconds</MenuItem>
                 <MenuItem value={60}>1 minute</MenuItem>
                 <MenuItem value={180}>3 minute</MenuItem>
                 <MenuItem value={300}>5 minutes</MenuItem>
@@ -331,7 +335,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
             <ListItem>
               <Button
                 variant="contained"
-                onClick={() => setImageAnalysis("")}
+                onClick={() => setImageAnalysis({ status: "" })}
                 startIcon={<ClearIcon />}
                 fullWidth
               >
