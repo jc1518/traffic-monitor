@@ -377,7 +377,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                     }}
                     style={{
                       border: selectedImages.includes(index)
-                        ? "2px solid #1976d2"
+                        ? "4px solid blue"
                         : isAlarmed
                         ? "4px solid red"
                         : "2px solid transparent",
@@ -397,7 +397,51 @@ const ImageManager: React.FC<ImageManagerProps> = ({
             sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}
           >
             <div style={{ display: showAnalysis ? "block" : "none" }}>
-              {JSON.stringify(imageAnalysis)}
+              {imageAnalysis.time ? (
+                <>
+                  <h3>Analysis Results</h3>
+                  <p>Time: {imageAnalysis.time}</p>
+                  <div>
+                    {(() => {
+                      try {
+                        const statusObject = JSON.parse(imageAnalysis.status);
+                        return Object.entries(statusObject).map(
+                          ([key, image]: [string, any]) => (
+                            <div
+                              key={key}
+                              style={{
+                                marginBottom: "16px",
+                                border: "1px solid #ccc",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                backgroundColor:
+                                  image.score >= alarmThreshold
+                                    ? "red"
+                                    : "white",
+                              }}
+                            >
+                              <p>
+                                <strong>{key}</strong>
+                              </p>
+                              <p>
+                                <strong>Score:</strong> {image.score}
+                              </p>
+                              <p>
+                                <strong>Analysis:</strong> {image.analysis}
+                              </p>
+                            </div>
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Error parsing JSON:", error);
+                        return <p>Invalid analysis data.</p>;
+                      }
+                    })()}
+                  </div>
+                </>
+              ) : (
+                <p>No analysis results available.</p>
+              )}
             </div>
           </Box>
         </Box>
