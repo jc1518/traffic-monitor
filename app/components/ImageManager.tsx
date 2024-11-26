@@ -49,7 +49,11 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [newImageUrl, setNewImageUrl] = useState<string>("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
-  const [imageAnalysis, setImageAnalysis] = useState<string>("");
+  const [imageAnalysis, setImageAnalysis] = useState<{
+    status: string;
+    time?: string;
+  }>({ status: "" });
+  useState<{ status: string; time?: string } | null>(null);
   const [time, setTime] = useState<string>("");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
@@ -63,11 +67,14 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [alarmThreshold, setAlarmThreshold] = useState<number>(3);
 
   const alarmOptions = [
-    { value: 1, label: "Very light traffic, free-flowing" },
-    { value: 2, label: "Light traffic, minimal slowdowns" },
-    { value: 3, label: "Moderate traffic, some congestion" },
-    { value: 4, label: "Heavy traffic, significant slowdowns" },
-    { value: 5, label: "Severe traffic, gridlock or near-standstill" },
+    { value: 1, label: "Score 1 - Very light traffic, free-flowing" },
+    { value: 2, label: "Score 2 - Light traffic, minimal slowdowns" },
+    { value: 3, label: "Score 3 - Moderate traffic, some congestion" },
+    { value: 4, label: "Score 4 - Heavy traffic, significant slowdowns" },
+    {
+      value: 5,
+      label: "Score 5 - Severe traffic, gridlock or near-standstill",
+    },
   ];
 
   useEffect(() => {
@@ -138,7 +145,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
 
   const handleInvokeBedrock = useCallback(async () => {
     setLoading(true);
-    setImageAnalysis("Checking cameras...");
+    setImageAnalysis({ status: "checking cameras..." });
     const currentTime = new Date().toISOString();
     const localTime = new Date(currentTime).toLocaleTimeString("en-US", {
       timeZone: timeZone,
@@ -157,7 +164,8 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       throw new Error(`HTTP error! status: ${response!.status}`);
     }
     const responseData = await response.json();
-    setImageAnalysis(responseData.reply);
+    const result = { time: localTime, status: JSON.parse(responseData.reply) };
+    setImageAnalysis(result);
     setLoading(false);
   }, [imageUrls, timeZone]);
 
@@ -319,49 +327,57 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid container spacing={2}>
-            {imageUrls.map((url, index) => (
-              <Grid item xs={12 / imagesPerRow} key={url}>
-                <Image
-                  src={url}
-                  width={300}
-                  height={225}
-                  quality={70}
-                  priority={true}
-                  alt={`Image ${index + 1}`}
-                  unoptimized
-                  onClick={() => {
-                    setSelectedImages((prev) =>
-                      prev.includes(index)
-                        ? prev.filter((i) => i !== index)
-                        : [...prev, index]
-                    );
-                  }}
-                  style={{
-                    border: selectedImages.includes(index)
-                      ? "2px solid #1976d2"
-                      : "2px solid transparent",
-                    objectFit: "cover",
-                    width: "100%",
-                    height: "auto",
-                    borderRadius: "4px",
-                    transition: "border-color 0.3s ease",
-                  }}
-                />
-              </Grid>
-            ))}
+            {imageUrls.map((url, index) => {
+              let score = 0;
+              try {
+                score = imageAnalysis?.time
+                  ? JSON.parse(imageAnalysis.status)[`Image ${index + 1}`]
+                      ?.score
+                  : 0;
+              } catch (err) {
+                console.log(err);
+              }
+              const isAlarmed = score >= alarmThreshold; // Determine if the score meets the alarm threshold
+
+              return (
+                <Grid item xs={12 / imagesPerRow} key={url}>
+                  <Image
+                    src={url}
+                    width={300}
+                    height={225}
+                    quality={70}
+                    priority={true}
+                    alt={`Image ${index + 1}`}
+                    unoptimized
+                    onClick={() => {
+                      setSelectedImages((prev) =>
+                        prev.includes(index)
+                          ? prev.filter((i) => i !== index)
+                          : [...prev, index]
+                      );
+                    }}
+                    style={{
+                      border: selectedImages.includes(index)
+                        ? "2px solid #1976d2"
+                        : isAlarmed // Apply red border if alarmed
+                        ? "4px solid red" // Bold red rectangle for alarm
+                        : "2px solid transparent",
+                      objectFit: "cover",
+                      width: "100%",
+                      height: "auto",
+                      borderRadius: "4px",
+                      transition: "border-color 0.3s ease",
+                    }}
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
           <Box
             sx={{ p: 2, mb: 2, borderRadius: 4, backgroundColor: "#f8f9fa" }}
           >
-            <Typography
-              variant="body1"
-              mt={2}
-              style={{ display: showAnalysis ? "block" : "none" }}
-            >
-              {time}
-            </Typography>
             <div style={{ display: showAnalysis ? "block" : "none" }}>
-              <ReactMarkdown>{JSON.stringify(imageAnalysis)}</ReactMarkdown>
+              {JSON.stringify(imageAnalysis)}
             </div>
           </Box>
         </Box>

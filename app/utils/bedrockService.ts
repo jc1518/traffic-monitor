@@ -49,7 +49,7 @@ export async function converseWithModel(
     messages: conversation,
     inferenceConfig: {
       maxTokens: 4096,
-      temperature: 0.5,
+      temperature: 0.1,
       topP: 0.9,
     },
   });
