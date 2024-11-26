@@ -32,11 +32,11 @@ export const prompt = `
 
   Here is a example:
   {
-    1: {
+    "Image 1": {
     "score": 3
     "analysis": "he image shows moderate traffic on the Anzac Bridge westbound. There are multiple lanes of traffic with vehicles spread across them.",
     },
-    2: {
+    "Image 2": {
     "score": 2
     "analysis": "This image of the Anzac Bridge eastbound shows lighter traffic conditions. Vehicles are well-spaced and appear to be moving freely across multiple lanes.",
     },

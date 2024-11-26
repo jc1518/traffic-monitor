@@ -34,6 +34,7 @@ import {
   Clear as ClearIcon,
   DirectionsRun as DirectionsRunIcon,
 } from "@mui/icons-material";
+import { url } from "inspector";
 interface ImageManagerProps {
   storageKey: string;
   timeZone: string;
@@ -53,13 +54,13 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   const [imagesPerRow, setImagesPerRow] = useState(2);
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(15);
   const [autoDetect, setAutoDetect] = useState(false);
   const [detectInterval, setDetectInterval] = useState(60);
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [alarmThreshold, setAlarmThreshold] = useState<number | null>(3);
+  const [alarmThreshold, setAlarmThreshold] = useState<number>(3);
 
   const alarmOptions = [
     { value: 1, label: "Very light traffic, free-flowing" },
@@ -76,7 +77,12 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(() => {
-        loadImageUrls(storageKey).then(setImageUrls);
+        loadImageUrls(storageKey).then((newUrls) => {
+          const updatedUrls = newUrls.map(
+            (url) => `${url}?${new Date().getTime()}`
+          );
+          setImageUrls(updatedUrls);
+        });
       }, refreshInterval * 1000);
 
       return () => clearInterval(interval);
@@ -150,33 +156,8 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       console.error("Response headers:", Object.fromEntries(response!.headers));
       throw new Error(`HTTP error! status: ${response!.status}`);
     }
-    const reader = response!.body?.getReader();
-    let result = "";
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = new TextDecoder("utf-8").decode(value);
-        const lines = chunk.split("\n").filter(Boolean);
-
-        for (const line of lines) {
-          try {
-            const data = JSON.parse(line);
-
-            if (data.type === "chunk" && data.content) {
-              result += data.content;
-              setImageAnalysis(result);
-            } else if (data.type === "error") {
-              console.error("Stream error:", data.message);
-              setImageAnalysis("Sorry, there was an error. Please try again.");
-            }
-          } catch (e) {
-            console.error("Error parsing JSON:", e);
-          }
-        }
-      }
-    }
+    const responseData = await response.json();
+    setImageAnalysis(responseData.reply);
     setLoading(false);
   }, [imageUrls, timeZone]);
 
@@ -339,9 +320,9 @@ const ImageManager: React.FC<ImageManagerProps> = ({
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Grid container spacing={2}>
             {imageUrls.map((url, index) => (
-              <Grid item xs={12 / imagesPerRow} key={index}>
+              <Grid item xs={12 / imagesPerRow} key={url}>
                 <Image
-                  src={`${url}?${new Date().getTime()}`}
+                  src={url}
                   width={300}
                   height={225}
                   quality={70}
@@ -378,8 +359,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               style={{ display: showAnalysis ? "block" : "none" }}
             >
               {time}
-              <ReactMarkdown>{imageAnalysis}</ReactMarkdown>
             </Typography>
+            <div style={{ display: showAnalysis ? "block" : "none" }}>
+              <ReactMarkdown>{JSON.stringify(imageAnalysis)}</ReactMarkdown>
+            </div>
           </Box>
         </Box>
       </Box>

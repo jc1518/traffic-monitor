@@ -45,6 +45,11 @@ const defaultImageUrls: { [key: string]: string[] } = {
 };
 
 export const loadImageUrls = async (storageKey: string): Promise<string[]> => {
-  const urls = localStorage.getItem(storageKey);
-  return urls ? JSON.parse(urls) : defaultImageUrls[storageKey] || [];
+  try {
+    const urls = localStorage.getItem(storageKey);
+    return urls ? JSON.parse(urls) : defaultImageUrls[storageKey] || [];
+  } catch (error) {
+    console.error("Error loading image URLs:", error);
+    return defaultImageUrls[storageKey] || [];
+  }
 };
