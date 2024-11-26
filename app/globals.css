@@ -32,6 +32,18 @@ body {
   }
 }
 
+@keyframes flash {
+  0% {
+    border-color: red;
+  }
+  50% {
+    border-color: transparent;
+  }
+  100% {
+    border-color: red;
+  }
+}
+
 .custom-cursor {
   position: fixed;
   width: 30px;

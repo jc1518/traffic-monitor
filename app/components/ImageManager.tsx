@@ -378,14 +378,15 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                     style={{
                       border: selectedImages.includes(index)
                         ? "2px solid #1976d2"
-                        : isAlarmed // Apply red border if alarmed
-                        ? "4px solid red" // Bold red rectangle for alarm
+                        : isAlarmed
+                        ? "4px solid red"
                         : "2px solid transparent",
                       objectFit: "cover",
                       width: "100%",
                       height: "auto",
                       borderRadius: "4px",
                       transition: "border-color 0.3s ease",
+                      animation: isAlarmed ? "flash 1s infinite" : "none",
                     }}
                   />
                 </Grid>
