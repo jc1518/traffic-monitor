@@ -52,14 +52,14 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [imageAnalysis, setImageAnalysis] = useState<{
     status: string;
     time?: string;
-  }>({ status: "" });
+  }>({ status: "ready" });
   useState<{ status: string; time?: string } | null>(null);
   const [time, setTime] = useState<string>("");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   const [imagesPerRow, setImagesPerRow] = useState(2);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(15);
+  const [refreshInterval, setRefreshInterval] = useState(60);
   const [autoDetect, setAutoDetect] = useState(false);
   const [detectInterval, setDetectInterval] = useState(60);
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
@@ -164,15 +164,30 @@ const ImageManager: React.FC<ImageManagerProps> = ({
       throw new Error(`HTTP error! status: ${response!.status}`);
     }
     const responseData = await response.json();
-    const result = { time: localTime, status: JSON.parse(responseData.reply) };
+    let result;
+    try {
+      result = { time: localTime, status: JSON.parse(responseData.reply) };
+    } catch (err) {
+      console.error("Error parsing JSON:", err);
+      setImageAnalysis({ status: `error - ${err}`, time: localTime });
+      setLoading(false);
+      return;
+    }
     setImageAnalysis(result);
     setLoading(false);
   }, [imageUrls, timeZone]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      <Button onClick={() => setIsDrawerOpen((prev) => !prev)}>
-        {isDrawerOpen ? "Hide Camera Settings" : "Open Camera Settings"}
+      <Button
+        onClick={() => setIsDrawerOpen((prev) => !prev)}
+        startIcon={loading ? <CircularProgress size={30} /> : ""}
+      >
+        {loading
+          ? "Checking Cameras"
+          : isDrawerOpen
+          ? "Hide Camera Settings"
+          : "Open Camera Settings"}
       </Button>
       <Box sx={{ display: "flex" }}>
         <Drawer
