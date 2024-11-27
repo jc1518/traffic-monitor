@@ -14,6 +14,14 @@ const inner_sydney = [
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_bridge_eastbound.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/west_tower_anzac_br_looking_east.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_moore_park.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/airport_dr_mascot.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/alison_road_randwick.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_kensington.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_kingsford.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/botany_rd_matraville.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bunnerong_rd_matraville.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/campbell_rd_and_euston_rd_st_peters.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/city_road_newtown.jpeg",
 ];
 
 const sydney_north = [
