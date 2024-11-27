@@ -25,6 +25,7 @@ import {
   Radio,
   InputLabel,
   CircularProgress,
+  Modal,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -35,6 +36,8 @@ import {
   DirectionsRun as DirectionsRunIcon,
 } from "@mui/icons-material";
 import { url } from "inspector";
+import CloseIcon from "@mui/icons-material/Close";
+
 interface ImageManagerProps {
   storageKey: string;
   timeZone: string;
@@ -57,7 +60,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [time, setTime] = useState<string>("");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  const [imagesPerRow, setImagesPerRow] = useState(2);
+  const [imagesPerRow, setImagesPerRow] = useState(4);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(30);
   const [autoDetect, setAutoDetect] = useState(false);
@@ -65,6 +68,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [alarmThreshold, setAlarmThreshold] = useState<number>(3);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
   const alarmOptions = [
     { value: 1, label: "Score 1 - Very light traffic, free-flowing" },
@@ -179,6 +183,10 @@ const ImageManager: React.FC<ImageManagerProps> = ({
     setImageAnalysis(result);
     setLoading(false);
   }, [imageUrls, timeZone]);
+
+  const handleImageDoubleClick = (url: string) => {
+    setEnlargedImage(url);
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -375,6 +383,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({
                           : [...prev, index]
                       );
                     }}
+                    onDoubleClick={() => handleImageDoubleClick(url)}
                     style={{
                       border: selectedImages.includes(index)
                         ? "4px solid blue"
@@ -444,6 +453,35 @@ const ImageManager: React.FC<ImageManagerProps> = ({
               )}
             </div>
           </Box>
+          <Modal open={!!enlargedImage} onClose={() => setEnlargedImage(null)}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                position: "relative",
+              }}
+            >
+              <IconButton
+                onClick={() => setEnlargedImage(null)}
+                sx={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                  color: "white",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <img
+                src={enlargedImage || ""}
+                alt="Enlarged"
+                style={{ maxWidth: "90%", maxHeight: "90%" }}
+              />
+            </Box>
+          </Modal>
         </Box>
       </Box>
     </Box>
