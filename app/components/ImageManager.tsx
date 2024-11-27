@@ -58,16 +58,79 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   }>({ status: "" });
   useState<{ status: string; time?: string } | null>(null);
   const [time, setTime] = useState<string>("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem("isDrawerOpen");
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.error("Error reading isDrawerOpen from localStorage", error);
+      return false;
+    }
+  });
 
-  const [imagesPerRow, setImagesPerRow] = useState(4);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(30);
-  const [autoDetect, setAutoDetect] = useState(false);
-  const [detectInterval, setDetectInterval] = useState(30);
+  const [imagesPerRow, setImagesPerRow] = useState(() => {
+    try {
+      const saved = localStorage.getItem("imagesPerRow");
+      return saved !== null ? Number(saved) : 3; // Default value
+    } catch (error) {
+      console.error("Error reading imagesPerRow from localStorage", error);
+      return 4;
+    }
+  });
+
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      const saved = localStorage.getItem("autoRefresh");
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch (error) {
+      console.error("Error reading autoRefresh from localStorage", error);
+      return true;
+    }
+  });
+
+  const [refreshInterval, setRefreshInterval] = useState(() => {
+    try {
+      const saved = localStorage.getItem("refreshInterval");
+      return saved !== null ? Number(saved) : 30;
+    } catch (error) {
+      console.error("Error reading refreshInterval from localStorage", error);
+      return 30;
+    }
+  });
+
+  const [autoDetect, setAutoDetect] = useState(() => {
+    try {
+      const saved = localStorage.getItem("autoDetect");
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.error("Error reading autoDetect from localStorage", error);
+      return false;
+    }
+  });
+
+  const [detectInterval, setDetectInterval] = useState(() => {
+    try {
+      const saved = localStorage.getItem("detectInterval");
+      return saved !== null ? Number(saved) : 30;
+    } catch (error) {
+      console.error("Error reading detectInterval from localStorage", error);
+      return 30;
+    }
+  });
+
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [alarmThreshold, setAlarmThreshold] = useState<number>(3);
+
+  const [alarmThreshold, setAlarmThreshold] = useState(() => {
+    try {
+      const saved = localStorage.getItem("alarmThreshold");
+      return saved !== null ? Number(saved) : 4;
+    } catch (error) {
+      console.error("Error reading alarmThreshold from localStorage", error);
+      return 4;
+    }
+  });
+
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
   const alarmOptions = [
@@ -187,6 +250,76 @@ const ImageManager: React.FC<ImageManagerProps> = ({
   const handleImageDoubleClick = (url: string) => {
     setEnlargedImage(url);
   };
+
+  useEffect(() => {
+    // Load settings from local storage
+    const savedImagesPerRow = localStorage.getItem("imagesPerRow");
+    const savedAutoRefresh = localStorage.getItem("autoRefresh");
+    const savedRefreshInterval = localStorage.getItem("refreshInterval");
+    const savedAutoDetect = localStorage.getItem("autoDetect");
+    const savedAlarmThreshold = localStorage.getItem("alarmThreshold");
+    const savedShowAnalysis = localStorage.getItem("showAnalysis");
+    const savedDetectInterval = localStorage.getItem("detectInterval");
+    const savedIsDrawerOpen = localStorage.getItem("isDrawerOpen");
+
+    if (savedImagesPerRow !== null) {
+      setImagesPerRow(Number(savedImagesPerRow));
+    }
+    if (savedAutoRefresh !== null) {
+      setAutoRefresh(JSON.parse(savedAutoRefresh));
+    }
+    if (savedRefreshInterval !== null) {
+      setRefreshInterval(Number(savedRefreshInterval));
+    }
+    if (savedAutoDetect !== null) {
+      setAutoDetect(JSON.parse(savedAutoDetect));
+    }
+    if (savedAlarmThreshold !== null) {
+      setAlarmThreshold(Number(savedAlarmThreshold));
+    }
+    if (savedShowAnalysis !== null) {
+      setAutoDetect(JSON.parse(savedShowAnalysis));
+    }
+    if (savedDetectInterval !== null) {
+      setRefreshInterval(Number(savedDetectInterval));
+    }
+    if (savedIsDrawerOpen !== null) {
+      setAutoDetect(JSON.parse(savedIsDrawerOpen));
+    }
+  }, []); // Run only once on mount
+
+  // Update settings in local storage when they change
+  useEffect(() => {
+    localStorage.setItem("imagesPerRow", imagesPerRow.toString());
+  }, [imagesPerRow]);
+
+  useEffect(() => {
+    localStorage.setItem("autoRefresh", JSON.stringify(autoRefresh));
+  }, [autoRefresh]);
+
+  useEffect(() => {
+    localStorage.setItem("refreshInterval", refreshInterval.toString());
+  }, [refreshInterval]);
+
+  useEffect(() => {
+    localStorage.setItem("autoDetect", JSON.stringify(autoDetect));
+  }, [autoDetect]);
+
+  useEffect(() => {
+    localStorage.setItem("alarmThreshold", alarmThreshold.toString());
+  }, [alarmThreshold]);
+
+  useEffect(() => {
+    localStorage.setItem("isDrawOpen", JSON.stringify(isDrawerOpen));
+  }, [isDrawerOpen]);
+
+  useEffect(() => {
+    localStorage.setItem("detectInterval", detectInterval.toString());
+  }, [detectInterval]);
+
+  useEffect(() => {
+    localStorage.setItem("showAnalysis", JSON.stringify(showAnalysis));
+  }, [showAnalysis]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
