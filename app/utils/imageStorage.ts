@@ -12,7 +12,6 @@ export const saveImageUrls = async (
 const inner_sydney = [
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_bridge_westbound.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_bridge_eastbound.jpeg",
-  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/west_tower_anzac_br_looking_east.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_moore_park.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/airport_dr_mascot.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/alison_road_randwick.jpeg",
@@ -22,6 +21,7 @@ const inner_sydney = [
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bunnerong_rd_matraville.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/campbell_rd_and_euston_rd_st_peters.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/city_road_newtown.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/city_west_link.jpeg",
 ];
 
 const sydney_north = [

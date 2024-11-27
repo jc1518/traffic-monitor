@@ -10,9 +10,12 @@ const CurrentTime: React.FC<CurrentTimeProps> = ({ timeZone }) => {
 
   const fetchTime = async () => {
     const currentTime = new Date();
-    const localTime = currentTime.toLocaleTimeString("en-US", {
+    const localTime = currentTime.toLocaleString("en-US", {
       timeZone: timeZone,
       hour: "2-digit",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
       minute: "2-digit",
       second: "2-digit",
       hour12: true,
