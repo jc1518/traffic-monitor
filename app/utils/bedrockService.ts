@@ -49,14 +49,22 @@ export async function converseWithModel(
     messages: conversation,
     inferenceConfig: {
       maxTokens: 4096,
-      temperature: 0.5,
+      temperature: 0.1,
       topP: 0.9,
     },
   });
 
   try {
     const response = await bedrockClient.send(command);
-    return response;
+    if (
+      response.output &&
+      response.output.message &&
+      response.output.message.content &&
+      response.output.message.content.length > 0
+    ) {
+      return response.output.message.content[0].text;
+    }
+    return "No response text";
   } catch (err) {
     console.error(`ERROR: Can't invoke '${modelId}'. Reason: ${err}`);
     throw new Error("Failed to invoke model");
