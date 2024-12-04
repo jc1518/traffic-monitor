@@ -13,7 +13,7 @@ const inner_sydney = [
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_bridge_westbound.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_bridge_eastbound.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_moore_park.jpeg",
-  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/airport_dr_mascot.jpeg",
+  "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/cleveland_street_surry_hills.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/alison_road_randwick.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_kensington.jpeg",
   "https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/anzac_parade_kingsford.jpeg",

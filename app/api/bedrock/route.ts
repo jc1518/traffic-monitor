@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
     const bedrockRegion = "us-west-2";
 
     // const modelId = "anthropic.claude-3-haiku-20240307-v1:0";
-    // const modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0";
-    const modelId = "anthropic.claude-3-5-sonnet-20241022-v2:0";
+    const modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0";
+    // const modelId = "anthropic.claude-3-5-sonnet-20241022-v2:0";
 
     content.push({ text: prompt });
 
